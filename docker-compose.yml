@@ -6,7 +6,7 @@ services:
       - "8080:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./public:/var/www/html
+      - ./:/var/www/html
     depends_on:
       - php
     networks:
@@ -16,7 +16,7 @@ services:
     image: php:8.2-fpm
     container_name: php-container
     volumes:
-      - ./public:/var/www/html
+      - ./:/var/www/html
     networks:
       - my-network
 
