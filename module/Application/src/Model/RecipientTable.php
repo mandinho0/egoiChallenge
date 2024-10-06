@@ -2,13 +2,21 @@
 
 namespace Application\Model;
 
+use Exception;
 use Laminas\Db\TableGateway\TableGatewayInterface;
 use Laminas\Db\ResultSet\ResultSetInterface;
+use RuntimeException;
 
 class RecipientTable
 {
+    /** @var TableGatewayInterface  */
     protected $tableGateway;
 
+    /**
+     * Construct Method
+     *
+     * @param TableGatewayInterface $tableGateway
+     */
     public function __construct(TableGatewayInterface $tableGateway)
     {
         $this->tableGateway = $tableGateway;
@@ -29,34 +37,34 @@ class RecipientTable
      *
      * @param int $id
      * @return Recipient|null
-     * @throws \RuntimeException
+     * @throws RuntimeException|Exception
      */
-    public function getRecipient($id)
+    public function getRecipient(int $id): ?Recipient
     {
-        $rowset = $this->tableGateway->select(['id' => (int) $id]);
-        $arrayRowset = iterator_to_array($rowset);
-        $recipient = current($arrayRowset);
+        $rowset = $this->tableGateway->select(['id' => $id]);
+        $row = $rowset->current();
 
-        if (!$recipient) {
-            throw new \RuntimeException(sprintf(
-                'Could not find recipient with ID %d',
-                $id
-            ));
+        if (! $row) {
+            throw new Exception("Could not find recipient with id $id");
         }
+
+        $recipient = new Recipient();
+        $recipient->exchangeArray($row->getArrayCopy());
 
         return $recipient;
     }
+
 
     /**
      * Save or update a recipient
      *
      * @param Recipient $recipient
      */
-    public function saveRecipient(Recipient $recipient)
+    public function saveRecipient(Recipient $recipient, $update = false)
     {
         $data = $recipient->getArrayCopy();
 
-        if ($recipient->id) {
+        if ($update) {
             $this->tableGateway->update($data, ['id' => (int) $recipient->id]);
         } else {
             $this->tableGateway->insert($data);

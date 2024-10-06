@@ -31,13 +31,25 @@ return [
                     ],
                 ],
             ],
-            // New route to CRUD de recipients
             'recipients' => [
                 'type' => Segment::class,
                 'options' => [
                     'route' => '/recipients[/:id]',
                     'defaults' => [
                         'controller' => Controller\RecipientController::class,
+                    ],
+                ],
+                'may_terminate' => true,
+                'child_routes' => [
+                    'bulk' => [
+                        'type' => Segment::class,
+                        'options' => [
+                            'route' => '/bulk',
+                            'defaults' => [
+                                'controller' => Controller\RecipientController::class,
+                                'action' => 'bulk',
+                            ],
+                        ],
                     ],
                 ],
             ],

@@ -2,28 +2,50 @@
 
 namespace Application\Model;
 
+use Exception;
 use Laminas\InputFilter\InputFilter;
-use Laminas\InputFilter\InputFilterAwareInterface;
 use Laminas\InputFilter\InputFilterInterface;
 use Laminas\Validator\NotEmpty;
 use Laminas\Validator\Regex;
 
-class Recipient implements InputFilterAwareInterface
+class Recipient
 {
+    /** @var $id  */
     public $id;
+
+    /** @var $name  */
     public $name;
+
+    /** @var $phone_number  */
     public $phone_number;
+
+    /** @var $email  */
     public $email;
+
+    /** @var $inputFilter  */
     protected $inputFilter;
 
-    public function exchangeArray(array $data)
+    /**
+     * Set data method
+     *
+     * @param array $data
+     * @return void
+     */
+    public function exchangeArray(array $data, $toUpdate = false)
     {
-        $this->id = $data['id'] ?? null;
+        if (!$toUpdate) {
+            $this->id = $data['id'] ?? null;
+        }
         $this->name = $data['name'] ?? null;
         $this->phone_number = $data['phone_number'] ?? null;
         $this->email = $data['email'] ?? null;
     }
 
+    /**
+     * Get Array of object
+     *
+     * @return array
+     */
     public function getArrayCopy()
     {
         return [
@@ -34,67 +56,74 @@ class Recipient implements InputFilterAwareInterface
         ];
     }
 
+    /**
+     * Set Input Filter method
+     *
+     * @param InputFilterInterface $inputFilter
+     * @return mixed
+     * @throws Exception
+     */
     public function setInputFilter(InputFilterInterface $inputFilter)
     {
-        throw new \Exception("Not used");
+        throw new Exception("Not used");
     }
 
-    // Add Validators
-    public function getInputFilter()
+    /**
+     * Add Validators
+     *
+     * @return InputFilter
+     */
+    public static function getInputFilter()
     {
-        if (!$this->inputFilter) {
-            $inputFilter = new InputFilter();
+        $inputFilter = new InputFilter();
 
-            $inputFilter->add([
-                'name' => 'name',
-                'required' => true,
-                'filters' => [
-                    ['name' => 'StringTrim'],
-                    ['name' => 'StripTags'],
-                ],
-                'validators' => [
-                    [
-                        'name' => NotEmpty::class,
-                        'options' => [
-                            'messages' => [
-                                NotEmpty::IS_EMPTY => 'O nome é obrigatório',
-                            ],
+        $inputFilter->add([
+            'name' => 'name',
+            'required' => true,
+            'filters' => [
+                ['name' => 'StringTrim'],
+                ['name' => 'StripTags'],
+            ],
+            'validators' => [
+                [
+                    'name' => NotEmpty::class,
+                    'options' => [
+                        'messages' => [
+                            NotEmpty::IS_EMPTY => 'The name is required',
                         ],
                     ],
                 ],
-            ]);
+            ],
+        ]);
 
-            $inputFilter->add([
-                'name' => 'phone_number',
-                'required' => true,
-                'filters' => [
-                    ['name' => 'StringTrim'],
-                    ['name' => 'StripTags'],
-                ],
-                'validators' => [
-                    [
-                        'name' => NotEmpty::class,
-                        'options' => [
-                            'messages' => [
-                                NotEmpty::IS_EMPTY => 'O número de telefone é obrigatório',
-                            ],
-                        ],
-                    ],
-                    [
-                        'name' => Regex::class,
-                        'options' => [
-                            'pattern' => '/^\+?\d{10,15}$/',
-                            'messages' => [
-                                Regex::NOT_MATCH => 'O número de telefone deve ser válido (ex: +351912345678)',
-                            ],
+        $inputFilter->add([
+            'name' => 'phone_number',
+            'required' => true,
+            'filters' => [
+                ['name' => 'StringTrim'],
+                ['name' => 'StripTags'],
+            ],
+            'validators' => [
+                [
+                    'name' => NotEmpty::class,
+                    'options' => [
+                        'messages' => [
+                            NotEmpty::IS_EMPTY => 'The phone number is required',
                         ],
                     ],
                 ],
-            ]);
+                [
+                    'name' => Regex::class,
+                    'options' => [
+                        'pattern' => '/^\+?\d{10,15}$/',
+                        'messages' => [
+                            Regex::NOT_MATCH => 'The phone number must be valid (ex: +351912345678)',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
 
-            $this->inputFilter = $inputFilter;
-        }
-
-        return $this->inputFilter;
+        return $inputFilter;
     }
 }

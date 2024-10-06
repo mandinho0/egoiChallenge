@@ -13,10 +13,14 @@ services:
       - my-network
 
   php:
-    image: php:8.2-fpm
     container_name: php-container
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ./:/var/www/html
+    ports: 
+      - "80:80"
     networks:
       - my-network
 

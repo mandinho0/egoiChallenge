@@ -9,6 +9,11 @@ use Laminas\View\Model\ViewModel;
 
 class IndexController extends AbstractActionController
 {
+    /**
+     * Index method
+     *
+     * @return ViewModel
+     */
     public function indexAction()
     {
         return new ViewModel();

@@ -1,4 +1,4 @@
-FROM php:8.3-apache
+FROM php:8.2-fpm
 
 LABEL maintainer="getlaminas.org" \
     org.label-schema.docker.dockerfile="/Dockerfile" \
@@ -10,9 +10,9 @@ LABEL maintainer="getlaminas.org" \
 RUN apt-get update
 
 ## Configure Apache
-RUN a2enmod rewrite \
-    && sed -i 's!/var/www/html!/var/www/public!g' /etc/apache2/sites-available/000-default.conf \
-    && mv /var/www/html /var/www/public
+#RUN a2enmod rewrite \
+ #   && sed -i 's!/var/www/html!/var/www/public!g' /etc/apache2/sites-available/000-default.conf \
+  #  && mv /var/www/html /var/www/public
 
 ## Install Composer
 RUN curl -sS https://getcomposer.org/installer \
@@ -43,7 +43,11 @@ RUN apt-get install --yes libicu-dev \
 ###
 
 ## MySQL PDO support
-# RUN docker-php-ext-install pdo_mysql
+RUN apt-get update && apt-get install -y \
+    default-mysql-client \
+    && docker-php-ext-install pdo pdo_mysql mysqli \
+    && docker-php-ext-enable pdo_mysql mysqli
+
 
 ## PostgreSQL PDO support
 # RUN apt-get install --yes libpq-dev \
@@ -74,5 +78,6 @@ RUN apt-get install --yes libicu-dev \
 #     && pecl install redis \
 #     && docker-php-ext-enable redis
 
+EXPOSE 80
 
 WORKDIR /var/www

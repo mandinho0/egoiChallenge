@@ -20,8 +20,6 @@ class SmsService
                 exit(0);
             }
         }
-
-        while (pcntl_waitpid(0, $status) != -1);
     }
 
     private function sendSms(array $recipient)

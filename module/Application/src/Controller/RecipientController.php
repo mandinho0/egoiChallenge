@@ -7,16 +7,28 @@ use Application\Model\RecipientTable;
 use Laminas\Mvc\Controller\AbstractRestfulController;
 use Laminas\View\Model\JsonModel;
 
+use function PHPUnit\Framework\isJson;
+
 class RecipientController extends AbstractRestfulController
 {
+    /** @var RecipientTable  */
     private $recipientTable;
 
+    /**
+     * Constructor Method
+     *
+     * @param RecipientTable $recipientTable
+     */
     public function __construct(RecipientTable $recipientTable)
     {
         $this->recipientTable = $recipientTable;
     }
 
-    // GET /recipients
+    /**
+     * GET /recipients
+     *
+     * @return JsonModel
+     */
     public function getList()
     {
         $recipients = $this->recipientTable->fetchAll();
@@ -29,50 +41,104 @@ class RecipientController extends AbstractRestfulController
         return new JsonModel(['data' => $recipientsArray]);
     }
 
-    // GET /recipients/:id
-    public function get($id)
+    /**
+     * GET /recipients/:id
+     *
+     * @param mixed $id
+     * @return JsonModel
+     */
+    public function get(mixed $id)
     {
         $recipient = $this->recipientTable->getRecipient($id);
         return new JsonModel(['data' => $recipient->getArrayCopy()]);
     }
 
-    // POST /recipients
-    public function create($data)
+    /**
+     * POST /recipients
+     *
+     * @param mixed $data
+     * @return JsonModel
+     */
+    public function create(mixed $data)
     {
-        $recipient = new Recipient();
-        $recipient->exchangeArray($data);
-        $inputFilter = $recipient->getInputFilter();
+        $routeMatch = $this->getEvent()->getRouteMatch();
+        $actionName = $routeMatch->getParam('id');
+
+        if ($actionName === 'bulk') {
+            return $this->bulk($data);
+        }
+
+        $inputFilter = Recipient::getInputFilter();
         $inputFilter->setData($data);
 
-        if (!$inputFilter->isValid()) {
+        if (! $inputFilter->isValid()) {
             return new JsonModel([
                 'success' => false,
                 'messages' => $inputFilter->getMessages(),
             ]);
         }
 
+        $recipient = new Recipient();
+        $recipient->exchangeArray($data);
         $this->recipientTable->saveRecipient($recipient);
 
         return new JsonModel(['success' => true, 'data' => $recipient->getArrayCopy()]);
     }
 
-    // PUT /recipients/:id
-    public function update($id, $data)
+    /**
+     * Bulk insert /recipients/bulk
+     *
+     * @param mixed $data
+     * @return JsonModel
+     */
+    public function bulk(mixed $data)
     {
-        try {
-            $recipient = $this->recipientTable->getRecipient($id);
-            $recipient->exchangeArray($data);
-            $inputFilter = $recipient->getInputFilter();
-            $inputFilter->setData($data);
+        $recipients = [];
+        foreach ($data as $item) {
+            $inputFilter = Recipient::getInputFilter();
+            $inputFilter->setData($item);
 
-            if (!$inputFilter->isValid()) {
+            if (! $inputFilter->isValid()) {
                 return new JsonModel([
                     'success' => false,
                     'messages' => $inputFilter->getMessages(),
                 ]);
             }
 
+            $recipient = new Recipient();
+            $recipient->exchangeArray($item);
+
             $this->recipientTable->saveRecipient($recipient);
+            $recipients[] = $recipient->getArrayCopy();
+        }
+
+        return new JsonModel(['success' => true, 'data' => $recipients]);
+    }
+
+    /**
+     * PUT /recipients/:id
+     *
+     * @param mixed $id
+     * @param mixed $data
+     * @return JsonModel
+     */
+    public function update(mixed $id, mixed $data)
+    {
+        try {
+            $inputFilter = Recipient::getInputFilter();
+            $inputFilter->setData($data);
+
+            if (! $inputFilter->isValid()) {
+                return new JsonModel([
+                    'success' => false,
+                    'messages' => $inputFilter->getMessages(),
+                ]);
+            }
+
+            $recipient = $this->recipientTable->getRecipient((int)$id);
+            $recipient->exchangeArray($data, true);
+
+            $this->recipientTable->saveRecipient($recipient, true);
 
             return new JsonModel(['success' => true, 'data' => $recipient->getArrayCopy()]);
         } catch (\Exception $e) {
@@ -83,8 +149,13 @@ class RecipientController extends AbstractRestfulController
         }
     }
 
-    // DELETE /recipients/:id
-    public function delete($id)
+    /**
+     * DELETE /recipients/:id
+     *
+     * @param mixed $id
+     * @return JsonModel
+     */
+    public function delete(mixed $id)
     {
         $this->recipientTable->deleteRecipient($id);
         return new JsonModel(['data' => 'Deleted']);
