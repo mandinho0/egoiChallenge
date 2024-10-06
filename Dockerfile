@@ -9,10 +9,6 @@ LABEL maintainer="getlaminas.org" \
 ## Update package information
 RUN apt-get update
 
-## Configure Apache
-#RUN a2enmod rewrite \
- #   && sed -i 's!/var/www/html!/var/www/public!g' /etc/apache2/sites-available/000-default.conf \
-  #  && mv /var/www/html /var/www/public
 
 ## Install Composer
 RUN curl -sS https://getcomposer.org/installer \
@@ -35,48 +31,14 @@ RUN apt-get install --yes libicu-dev \
 ## Optional PHP extensions 
 ###
 
-## mbstring for i18n string support
-# RUN docker-php-ext-install mbstring
-
-###
-## Some laminas/laminas-db supported PDO extensions
-###
-
 ## MySQL PDO support
 RUN apt-get update && apt-get install -y \
     default-mysql-client \
     && docker-php-ext-install pdo pdo_mysql mysqli \
     && docker-php-ext-enable pdo_mysql mysqli
 
-
-## PostgreSQL PDO support
-# RUN apt-get install --yes libpq-dev \
-#     && docker-php-ext-install pdo_pgsql
-
-###
-## laminas/laminas-cache supported extensions
-###
-
-## APCU
-# RUN pecl install apcu \
-#     && docker-php-ext-enable apcu
-
-## Memcached
-# RUN apt-get install --yes libmemcached-dev \
-#     && pecl install memcached \
-#     && docker-php-ext-enable memcached
-
-## MongoDB
-# RUN pecl install mongodb \
-#     && docker-php-ext-enable mongodb
-
-## Redis support.  igbinary and libzstd-dev are only needed based on 
-## redis pecl options
-# RUN pecl install igbinary \
-#     && docker-php-ext-enable igbinary \
-#     && apt-get install --yes libzstd-dev \
-#     && pecl install redis \
-#     && docker-php-ext-enable redis
+## Install pcntl to asynchronous mode
+RUN docker-php-ext-install pcntl
 
 EXPOSE 80
 

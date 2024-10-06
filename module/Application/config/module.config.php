@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 namespace Application;
 
+use Application\Command\SendSMSCommand;
+use Application\Controller\IndexController;
+use Application\Model\RecipientTable;
+use Application\Service\SmsConsumer;
+use Application\Service\SmsProducer;
+use Application\Service\SmsService;
+use Laminas\Db\Adapter\Adapter;
+use Laminas\Db\TableGateway\TableGateway;
 use Laminas\Router\Http\Literal;
 use Laminas\Router\Http\Segment;
 use Laminas\ServiceManager\Factory\InvokableFactory;
@@ -57,9 +65,11 @@ return [
     ],
     'controllers' => [
         'factories' => [
-            Controller\IndexController::class => InvokableFactory::class,
-            // Factory to RecipientController
-            Controller\RecipientController::class => function($container) {
+            IndexController::class => function ($container) {
+                $dbAdapter = $container->get(Adapter::class);
+                return new IndexController($dbAdapter);
+            },
+            Controller\RecipientController::class => function ($container) {
                 return new Controller\RecipientController(
                     $container->get(Model\RecipientTable::class)
                 );
@@ -69,14 +79,24 @@ return [
     'service_manager' => [
         'factories' => [
             // Factory to RecipientTable
-            Model\RecipientTable::class => function($container) {
-                $tableGateway = $container->get('RecipientTableGateway');
-                return new Model\RecipientTable($tableGateway);
+            Model\RecipientTable::class => function ($container) {
+                return new Model\RecipientTable($container->get('RecipientTableGateway'));
             },
             'RecipientTableGateway' => function ($container) {
-                $dbAdapter = $container->get(\Laminas\Db\Adapter\Adapter::class);
-                return new \Laminas\Db\TableGateway\TableGateway('recipients', $dbAdapter);
+                return new TableGateway('recipients', $container->get(Adapter::class));
             },
+            SendSMSCommand::class => function ($container) {
+                return new SendSMSCommand(
+                    $container->get(SmsService::class),
+                    $container->get(SmsProducer::class),
+                    $container->get(RecipientTable::class)
+                );
+            },
+            SmsService::class => function ($container) {
+                return new SmsService($container->get(RecipientTable::class));
+            },
+            SmsProducer::class => InvokableFactory::class,
+            SmsConsumer::class => InvokableFactory::class,
         ],
     ],
     'view_manager' => [
@@ -96,6 +116,11 @@ return [
         ],
         'strategies' => [
             'ViewJsonStrategy',
+        ],
+    ],
+    'laminas-cli' => [
+        'commands' => [
+            'app:sendSMS' => Command\SendSMSCommand::class,
         ],
     ],
 ];

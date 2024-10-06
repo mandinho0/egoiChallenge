@@ -16,7 +16,7 @@
     'db' => [
         'driver'   => 'Pdo_Mysql',
         'dsn'      => 'mysql:dbname=laminas;host=mysql-container',
-        'username' => 'rui', 
+        'username' => 'rui',
         'password' => 'rui123',
     ],
-];
+ ];
