@@ -19,13 +19,13 @@ class SendSMSCommand extends AbstractParamAwareCommand
      *
      * @param SmsService $smsService
      * @param SmsProducer $smsProducer
-     * @param RecipientRepository $recipientModel
+     * @param RecipientRepository $recipientRepository
      */
     public function __construct(
         protected SmsService $smsService,
         protected SmsProducer $smsProducer,
         protected SmsConsumer $smsConsumer,
-        protected RecipientRepository $recipientModel
+        protected RecipientRepository $recipientRepository
     ) {
         parent::__construct();
     }
@@ -52,7 +52,7 @@ class SendSMSCommand extends AbstractParamAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $recipients = $this->recipientModel->fetchAll();
+            $recipients = $this->recipientRepository->findAll();
             $withAMQ = $input->getArgument('mode');
 
             if ($withAMQ) {
