@@ -37,19 +37,40 @@ services:
     networks:
       - my-network
     volumes:
-      - db_data:/var/lib/mysql
+      - egoichallenge_db_data:/var/lib/mysql
 
   activemq:
-    image: rmohr/activemq
+    image: apache/activemq-artemis:latest-alpine
     container_name: activemq
+    build: artemis/
     ports:
-      - "61616:61616"
-      - "8161:8161"
+      - 8161:8161
+      # JMX Exporter
+      - 9404:9404
+      # Netty
+      - 9876:9876
+      # Port for CORE,MQTT,AMQP,HORNETQ,STOMP,OPENWIRE
+      - 61616:61616
+      # Port for HORNETQ,STOMP
+      - 5445:5445
+      # Port for AMQP
+      - 5672:5672
+      # Port for MQTT
+      - 1883:1883
+      #Port for STOMP
+      - 61613:61613
+    volumes:
+      - activemq-data:/var/lib/activemq/data
+    environment:
+      - ACTIVEMQ_USER=artemis
+      - ACTIVEMQ_PASSWORD=artemis
+      - ANONYMOUS_LOGIN=true
     networks:
       - my-network
 
 volumes:
-  db_data:
+  egoichallenge_db_data:
+  activemq-data:
 
 networks:
   my-network:

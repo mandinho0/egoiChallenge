@@ -70,9 +70,8 @@ return [
                 return new IndexController($dbAdapter);
             },
             Controller\RecipientController::class => function ($container) {
-                return new Controller\RecipientController(
-                    $container->get(Model\RecipientTable::class)
-                );
+                $recipientTable = $container->get(Model\RecipientTable::class);
+                return new Controller\RecipientController($recipientTable);
             },
         ],
     ],

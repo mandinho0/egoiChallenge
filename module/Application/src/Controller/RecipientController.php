@@ -4,6 +4,7 @@ namespace Application\Controller;
 
 use Application\Model\Recipient;
 use Application\Model\RecipientTable;
+use Laminas\Db\Adapter\Adapter;
 use Laminas\Mvc\Controller\AbstractRestfulController;
 use Laminas\View\Model\JsonModel;
 
@@ -11,17 +12,16 @@ use function PHPUnit\Framework\isJson;
 
 class RecipientController extends AbstractRestfulController
 {
-    /** @var RecipientTable  */
-    private $recipientTable;
 
     /**
      * Constructor Method
      *
      * @param RecipientTable $recipientTable
+     * @param Adapter $dbAdapter
      */
-    public function __construct(RecipientTable $recipientTable)
-    {
-        $this->recipientTable = $recipientTable;
+    public function __construct(
+        private RecipientTable $recipientTable,
+    ) {
     }
 
     /**
@@ -46,6 +46,7 @@ class RecipientController extends AbstractRestfulController
      *
      * @param mixed $id
      * @return JsonModel
+     * @throws \Exception
      */
     public function get(mixed $id)
     {

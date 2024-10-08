@@ -1,0 +1,31 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <broker xmlns="http://activemq.apache.org/schema/core" brokerName="localhost" dataDirectory="${activemq.data}">
+
+        <!-- Configurações gerais do broker -->
+        <destinationPolicy>
+            <policyMap>
+                <policyEntries>
+                    <policyEntry topic=">" producerFlowControl="true" memoryLimit="-1"/>
+                </policyEntries>
+            </policyMap>
+        </destinationPolicy>
+
+        <!-- Definir um conector de transporte com tamanho máximo de frame -->
+        <transportConnectors>
+            <transportConnector name="openwire" uri="tcp://activemq:61616?maximumFrameSize=104857600"/>
+        </transportConnectors>
+
+        <!-- Outras configurações do ActiveMQ -->
+        <persistenceAdapter>
+            <kahaDB directory="${activemq.data}/kahadb"/>
+        </persistenceAdapter>
+
+    </broker>
+
+    <import resource="classpath:activemq.xml"/>
+</beans>

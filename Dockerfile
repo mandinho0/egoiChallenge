@@ -28,8 +28,14 @@ RUN apt-get install --yes libicu-dev \
     && docker-php-ext-install intl
 
 ###
-## Optional PHP extensions 
+## Optional PHP extensions
+USER root
+RUN apt-get update && apt-get install -y vim
+
+RUN useradd -ms /bin/bash activemq
+
 ###
+
 
 ## MySQL PDO support
 RUN apt-get update && apt-get install -y \
@@ -40,6 +46,8 @@ RUN apt-get update && apt-get install -y \
 ## Install pcntl to asynchronous mode
 RUN docker-php-ext-install pcntl
 
-EXPOSE 80
+EXPOSE 80 
+EXPOSE 61616
+EXPOSE 8161
 
 WORKDIR /var/www

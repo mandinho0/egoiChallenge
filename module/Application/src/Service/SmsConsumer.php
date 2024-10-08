@@ -17,7 +17,8 @@ class SmsConsumer
      */
     public function __construct()
     {
-        $connection = new Connection('tcp://activemq:61616');
+        $connection = new Connection('tcp://localhost:61616', 10);
+
         $this->stomp = new Client($connection);
         $this->stomp->connect('admin', 'admin');
     }
@@ -36,7 +37,7 @@ class SmsConsumer
                 $frame = $this->stomp->readFrame();
 
                 if ($frame != null) {
-                    $recipient = json_decode($frame->body, true);
+                    $recipient = 'teste simples';
                     $this->sendSms($recipient);
                     $this->stomp->ack($frame);
                 }
