@@ -9,14 +9,11 @@ LABEL maintainer="getlaminas.org" \
 ## Update package information
 RUN apt-get update
 
-
 ## Install Composer
 RUN curl -sS https://getcomposer.org/installer \
   | php -- --install-dir=/usr/local/bin --filename=composer
 
-###
-## PHP Extensisons
-###
+### PHP Extensisons
 
 ## Install zip libraries and extension
 RUN apt-get install --yes git zlib1g-dev libzip-dev \
@@ -27,27 +24,21 @@ RUN apt-get install --yes libicu-dev \
     && docker-php-ext-configure intl \
     && docker-php-ext-install intl
 
-###
-## Optional PHP extensions
-USER root
-RUN apt-get update && apt-get install -y vim
-
-RUN useradd -ms /bin/bash activemq
-
-###
-
-
-## MySQL PDO support
-RUN apt-get update && apt-get install -y \
-    default-mysql-client \
+## Install MySQL PDO support
+RUN apt-get install --yes default-mysql-client \
     && docker-php-ext-install pdo pdo_mysql mysqli \
     && docker-php-ext-enable pdo_mysql mysqli
 
-## Install pcntl to asynchronous mode
+## Install pcntl for asynchronous mode
 RUN docker-php-ext-install pcntl
 
-EXPOSE 80 
-EXPOSE 61616
-EXPOSE 8161
+## Install OpenSSL
+RUN apt-get install --yes libssl-dev
 
-WORKDIR /var/www
+## Install Stomp for ActiveMQ
+RUN pecl install stomp \
+    && docker-php-ext-enable stomp
+
+EXPOSE 80 
+
+WORKDIR /var/www/html

@@ -17,10 +17,14 @@ class SmsConsumer
      */
     public function __construct()
     {
-        $connection = new Connection('tcp://localhost:61616', 10);
-
-        $this->stomp = new Client($connection);
-        $this->stomp->connect('admin', 'admin');
+        try {
+            $connection = new Connection('tcp://172.18.0.3:61613', 2);
+            $this->stomp = new Client($connection);
+            $this->stomp->setLogin('artemis', 'artemis');
+            $this->stomp->connect();
+        } catch (\Exception $e) {
+            error_log("error on Consumer Construct: " . $e->getMessage());
+        }
     }
 
     /**
@@ -37,7 +41,7 @@ class SmsConsumer
                 $frame = $this->stomp->readFrame();
 
                 if ($frame != null) {
-                    $recipient = 'teste simples';
+                    $recipient = json_decode($frame->body, true);
                     $this->sendSms($recipient);
                     $this->stomp->ack($frame);
                 }

@@ -10,6 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Application\Service\SmsService;
 use Application\Service\SmsProducer;
+use Application\Service\SmsConsumer;
 
 class SendSMSCommand extends AbstractParamAwareCommand
 {
@@ -23,6 +24,7 @@ class SendSMSCommand extends AbstractParamAwareCommand
     public function __construct(
         protected SmsService $smsService,
         protected SmsProducer $smsProducer,
+        protected SmsConsumer $smsConsumer,
         protected RecipientTable $recipientModel
     ) {
         parent::__construct();
@@ -37,7 +39,7 @@ class SendSMSCommand extends AbstractParamAwareCommand
     {
         $this->setName('app:sendSMS')
             ->setDescription('Send asynchronous SMS')
-            ->addOption('amq-mode', null, InputOption::VALUE_NONE, "Enable AMQ mode");
+            ->addArgument('mode', InputArgument::OPTIONAL, 'Mode of operation is "amq-mode"');
     }
 
     /**
@@ -51,16 +53,16 @@ class SendSMSCommand extends AbstractParamAwareCommand
     {
         try {
             $recipients = $this->recipientModel->fetchAll();
-            $withAMQ = $input->getOption('amq-mode');
+            $withAMQ = $input->getArgument('mode');
 
             if ($withAMQ) {
                 $this->smsProducer->sendToQueue($recipients);
+                $this->smsConsumer->consumeMessages();
             } else {
                 $this->smsService->sendSmsToRecipients($recipients);
             }
         } catch (\Exception $e) {
             $output->writeln("Error: " . $e->getMessage());
-
             return -1;
         }
 

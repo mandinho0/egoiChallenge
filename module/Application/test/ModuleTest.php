@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace ApplicationTest;
 
-use Application\Module;
+use Application\ConfigProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Application\Module;
+ * @covers \Application\ConfigProvider;
  */
 class ModuleTest extends TestCase
 {
     public function testProvidesConfig(): void
     {
-        $module = new Module();
+        $module = new ConfigProvider();
         $config = $module->getConfig();
 
         self::assertArrayHasKey('router', $config);

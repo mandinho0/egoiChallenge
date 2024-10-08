@@ -88,6 +88,7 @@ return [
                 return new SendSMSCommand(
                     $container->get(SmsService::class),
                     $container->get(SmsProducer::class),
+                    $container->get(SmsConsumer::class),
                     $container->get(RecipientTable::class)
                 );
             },

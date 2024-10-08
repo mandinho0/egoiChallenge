@@ -29,19 +29,16 @@ class SmsService
             if ($pid == -1) {
                 error_log("Failed to fork process for recipient: {$recipient['name']}");
             } elseif ($pid) {
-                // Parent process
                 continue;
             } else {
-                // Child process
+                // Child process: Handle SMS sending
                 $this->sendSms($recipient->getArrayCopy());
                 exit(0);
             }
         }
 
-        while (pcntl_waitpid(0, $status) != -1) {
-            $status = pcntl_wexitstatus($status);
-            error_log("Child process exited with status $status");
-        }
+        error_log("Parent process finished, SMS are being sent asynchronously.");
+        pcntl_signal(SIGCHLD, SIG_IGN);
     }
 
     /**
@@ -53,7 +50,7 @@ class SmsService
     private function sendSms(array $recipient)
     {
         error_log("Sending SMS to: {$recipient['name']} - {$recipient['phone_number']}");
-        sleep(2);
+        sleep(5);
         error_log("SMS sent to: {$recipient['name']}");
     }
 }
