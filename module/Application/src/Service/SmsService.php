@@ -2,17 +2,17 @@
 
 namespace Application\Service;
 
-use Application\Model\RecipientTable;
+use Application\Model\RecipientRepository;
 
 class SmsService
 {
     /**
      * Construct Method
      *
-     * @param RecipientTable $recipientModel
+     * @param RecipientRepository $recipientModel
      */
     public function __construct(
-        protected RecipientTable $recipientModel
+        protected RecipientRepository $recipientModel
     ) {
     }
 

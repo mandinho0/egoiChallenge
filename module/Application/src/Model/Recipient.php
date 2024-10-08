@@ -29,6 +29,7 @@ class Recipient
      * Set data method
      *
      * @param array $data
+     * @param bool $toUpdate
      * @return void
      */
     public function exchangeArray(array $data, $toUpdate = false)
@@ -69,7 +70,8 @@ class Recipient
     }
 
     /**
-     * Add Validators
+     * Add Validators Method
+     * Validators are here because this class is responsible of all data
      *
      * @return InputFilter
      */

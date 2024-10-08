@@ -38,6 +38,7 @@ services:
       - my-network
     volumes:
       - egoichallenge_db_data:/var/lib/mysql
+      - ./ddl.sql:/docker-entrypoint-initdb.d/ddl.sql
 
   activemq:
     image: apache/activemq-artemis:latest-alpine
@@ -52,8 +53,14 @@ services:
       restart: unless-stopped
     volumes:
       - activemq_data:/var/lib/artemis
+    #command: >
+      #sh -c "
+      #/var/lib/artemis-instance/bin/artemis run &
+      #/create-queue.sh"
+
     networks:
       - my-network
+
 
 volumes:
   egoichallenge_db_data:

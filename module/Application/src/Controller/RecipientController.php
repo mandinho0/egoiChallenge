@@ -3,12 +3,9 @@
 namespace Application\Controller;
 
 use Application\Model\Recipient;
-use Application\Model\RecipientTable;
-use Laminas\Db\Adapter\Adapter;
+use Application\Model\RecipientRepository;
 use Laminas\Mvc\Controller\AbstractRestfulController;
 use Laminas\View\Model\JsonModel;
-
-use function PHPUnit\Framework\isJson;
 
 class RecipientController extends AbstractRestfulController
 {
@@ -16,11 +13,10 @@ class RecipientController extends AbstractRestfulController
     /**
      * Constructor Method
      *
-     * @param RecipientTable $recipientTable
-     * @param Adapter $dbAdapter
+     * @param RecipientRepository $recipientRepository
      */
     public function __construct(
-        private RecipientTable $recipientTable,
+        private RecipientRepository $recipientRepository,
     ) {
     }
 
@@ -31,7 +27,7 @@ class RecipientController extends AbstractRestfulController
      */
     public function getList()
     {
-        $recipients = $this->recipientTable->fetchAll();
+        $recipients = $this->recipientRepository->findAll();
         $recipientsArray = [];
 
         foreach ($recipients as $recipient) {
@@ -50,7 +46,7 @@ class RecipientController extends AbstractRestfulController
      */
     public function get(mixed $id)
     {
-        $recipient = $this->recipientTable->getRecipient($id);
+        $recipient = $this->recipientRepository->getRecipient($id);
         return new JsonModel(['data' => $recipient->getArrayCopy()]);
     }
 
@@ -81,13 +77,13 @@ class RecipientController extends AbstractRestfulController
 
         $recipient = new Recipient();
         $recipient->exchangeArray($data);
-        $this->recipientTable->saveRecipient($recipient);
+        $this->recipientRepository->saveRecipient($recipient);
 
         return new JsonModel(['success' => true, 'data' => $recipient->getArrayCopy()]);
     }
 
     /**
-     * Bulk insert /recipients/bulk
+     * Bulk insert /bulk
      *
      * @param mixed $data
      * @return JsonModel
@@ -109,7 +105,7 @@ class RecipientController extends AbstractRestfulController
             $recipient = new Recipient();
             $recipient->exchangeArray($item);
 
-            $this->recipientTable->saveRecipient($recipient);
+            $this->recipientRepository->saveRecipient($recipient);
             $recipients[] = $recipient->getArrayCopy();
         }
 
@@ -136,10 +132,10 @@ class RecipientController extends AbstractRestfulController
                 ]);
             }
 
-            $recipient = $this->recipientTable->getRecipient((int)$id);
+            $recipient = $this->recipientRepository->getRecipient((int)$id);
             $recipient->exchangeArray($data, true);
 
-            $this->recipientTable->saveRecipient($recipient, true);
+            $this->recipientRepository->saveRecipient($recipient, true);
 
             return new JsonModel(['success' => true, 'data' => $recipient->getArrayCopy()]);
         } catch (\Exception $e) {
@@ -158,7 +154,7 @@ class RecipientController extends AbstractRestfulController
      */
     public function delete(mixed $id)
     {
-        $this->recipientTable->deleteRecipient($id);
+        $this->recipientRepository->deleteRecipient($id);
         return new JsonModel(['data' => 'Deleted']);
     }
 }

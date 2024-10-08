@@ -2,7 +2,7 @@
 
 namespace Application\Command;
 
-use Application\Model\RecipientTable;
+use Application\Model\RecipientRepository;
 use Laminas\Cli\Command\AbstractParamAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,13 +19,13 @@ class SendSMSCommand extends AbstractParamAwareCommand
      *
      * @param SmsService $smsService
      * @param SmsProducer $smsProducer
-     * @param RecipientTable $recipientModel
+     * @param RecipientRepository $recipientModel
      */
     public function __construct(
         protected SmsService $smsService,
         protected SmsProducer $smsProducer,
         protected SmsConsumer $smsConsumer,
-        protected RecipientTable $recipientModel
+        protected RecipientRepository $recipientModel
     ) {
         parent::__construct();
     }

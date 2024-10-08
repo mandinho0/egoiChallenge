@@ -7,7 +7,7 @@ use Laminas\Db\TableGateway\TableGatewayInterface;
 use Laminas\Db\ResultSet\ResultSetInterface;
 use RuntimeException;
 
-class RecipientTable
+class RecipientRepository
 {
     /** @var TableGatewayInterface  */
     protected $tableGateway;
@@ -27,7 +27,7 @@ class RecipientTable
      *
      * @return ResultSetInterface
      */
-    public function fetchAll()
+    public function findAll()
     {
         return $this->tableGateway->select();
     }

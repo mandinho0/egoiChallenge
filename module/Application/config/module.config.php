@@ -6,7 +6,7 @@ namespace Application;
 
 use Application\Command\SendSMSCommand;
 use Application\Controller\IndexController;
-use Application\Model\RecipientTable;
+use Application\Model\RecipientRepository;
 use Application\Service\SmsConsumer;
 use Application\Service\SmsProducer;
 use Application\Service\SmsService;
@@ -70,16 +70,16 @@ return [
                 return new IndexController($dbAdapter);
             },
             Controller\RecipientController::class => function ($container) {
-                $recipientTable = $container->get(Model\RecipientTable::class);
-                return new Controller\RecipientController($recipientTable);
+                $recipientRepository= $container->get(Model\RecipientRepository::class);
+                return new Controller\RecipientController($recipientRepository);
             },
         ],
     ],
     'service_manager' => [
         'factories' => [
-            // Factory to RecipientTable
-            Model\RecipientTable::class => function ($container) {
-                return new Model\RecipientTable($container->get('RecipientTableGateway'));
+            // Factory to RecipientRepository
+            Model\RecipientRepository::class => function ($container) {
+                return new Model\RecipientRepository($container->get('RecipientTableGateway'));
             },
             'RecipientTableGateway' => function ($container) {
                 return new TableGateway('recipients', $container->get(Adapter::class));
@@ -89,11 +89,11 @@ return [
                     $container->get(SmsService::class),
                     $container->get(SmsProducer::class),
                     $container->get(SmsConsumer::class),
-                    $container->get(RecipientTable::class)
+                    $container->get(RecipientRepository::class)
                 );
             },
             SmsService::class => function ($container) {
-                return new SmsService($container->get(RecipientTable::class));
+                return new SmsService($container->get(RecipientRepository::class));
             },
             SmsProducer::class => InvokableFactory::class,
             SmsConsumer::class => InvokableFactory::class,

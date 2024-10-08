@@ -4,14 +4,16 @@ namespace Application\Service;
 
 use Stomp\Client;
 use Stomp\Network\Connection;
+use Stomp\StatefulStomp;
+use Stomp\Transport\Frame;
 
 class SmsConsumer
 {
-    /** @var Client  */
+    /** @var StatefulStomp */
     private $stomp;
 
     /**
-     * Contruct Method ( connect to activeMQ )
+     * Construct Method (connect to ActiveMQ)
      *
      * @throws \Stomp\Exception\StompException
      */
@@ -19,34 +21,37 @@ class SmsConsumer
     {
         try {
             $connection = new Connection('tcp://172.18.0.3:61613', 2);
-            $this->stomp = new Client($connection);
-            $this->stomp->setLogin('artemis', 'artemis');
-            $this->stomp->connect();
+            $client = new Client($connection);
+            $client->setLogin('artemis', 'artemis');
+            $this->stomp = new StatefulStomp($client);
         } catch (\Exception $e) {
-            error_log("error on Consumer Construct: " . $e->getMessage());
+            error_log("Error on Consumer Construct: " . $e->getMessage());
         }
     }
 
     /**
      * Consume Messages Method
      *
-     * @return mixed
+     * @return void
      */
     public function consumeMessages()
     {
-        $this->stomp->subscribe('/queue/sms-queue');
+        try {
+            $this->stomp->subscribe('/queue/sms-queue', 'client-individual');
 
-        while (true) {
-            if ($this->stomp->getConnection()->readFrame()) {
-                $frame = $this->stomp->readFrame();
+            while (true) {
+                $frame = $this->stomp->read();
 
-                if ($frame != null) {
+                if ($frame instanceof Frame) {
                     $recipient = json_decode($frame->body, true);
                     $this->sendSms($recipient);
-                    $this->stomp->ack($frame);
+                    $this->stomp->ack($frame); // Acknowledge the message after processing
                 }
+
+                sleep(1); // Optional sleep to avoid high CPU usage
             }
-            sleep(1);
+        } catch (\Exception $e) {
+            error_log("Error on consumeMessages: " . $e->getMessage());
         }
     }
 
